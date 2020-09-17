@@ -14,12 +14,15 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 @ManagedBean(name = "addMarkersView")
 @RequestScoped
 public class AddMarkersView implements Serializable {
 
-    private MapModel emptyModel;
+    private MapModel mapModel;
 
     private String title;
     private String description;
@@ -30,11 +33,39 @@ public class AddMarkersView implements Serializable {
 
     @PostConstruct
     public void init() {
-        emptyModel = new DefaultMapModel();
+        mapModel = new DefaultMapModel();
+        List<Marker> markerList = getAllMarkers();
+        for (Marker m : markerList) {
+            mapModel.addOverlay(m);
+        }
+    }
+
+    private List<Marker> getAllMarkers() {
+        List<Marker> markers = new ArrayList<>();
+        try {
+            Class.forName("org.postgresql.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "1234567890");
+            String query = "SELECT * FROM description;";
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next() == false) {
+                System.out.println("Brak znaczników.");
+            } else {
+                do {
+                    Marker marker = new Marker(
+                            new LatLng(rs.getDouble("latitude"), rs.getDouble("longtitude")),
+                            rs.getString("name"));
+                    markers.add(marker);
+                } while (rs.next());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return markers;
     }
 
     public MapModel getEmptyModel() {
-        return emptyModel;
+        return mapModel;
     }
 
     public String getTitle() {
@@ -63,7 +94,7 @@ public class AddMarkersView implements Serializable {
 
     public void addMarker() {
         Marker marker = new Marker(new LatLng(lat, lng), title);
-        emptyModel.addOverlay(marker);
+        mapModel.addOverlay(marker);
         saveMarker();
 
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Znacznik dodany", "Lat:" + lat + ", Lng:" + lng));
@@ -81,8 +112,8 @@ public class AddMarkersView implements Serializable {
             statement.setDouble(4, getLng());
             statement.setString(5, getRankPlace());
             statement.setString(6, getWebsite());
-            statement.executeQuery();
-        } catch (Exception e){
+            statement.executeUpdate();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
