@@ -28,8 +28,19 @@
 
 	function markerAddComplete() {
 		var title = document.getElementById('title');
+		var description = document.getElementById('description');
+		var rankPlace = document.getElementById('rankPlace');
+		var website = document.getElementById('website');
+
 		currentMarker.setTitle(title.value);
+		currentMarker.setDescription(description.value);
+		currentMarker.setRankPlace(rankPlace.value);
+		currentMarker.setWebsite(website.value);
+
 		title.value = "";
+		description.value = "";
+		rankPlace.value = "";
+		website.title = "";
 
 		currentMarker = null;
 		PF('dlg').hide();
@@ -48,14 +59,21 @@
 	<div align="center">
 		<p:growl id="messages" showDetail="true" />
 
-		<p:gmap id="gmap" center="36.890257,30.707417" zoom="13" type="HYBRID" style="width:100%;height:400px"
+		<p:gmap id="gmap" center="52.219790, 19.614740" zoom="13" type="HYBRID" style="width:40%;height:400px"
 				model="#{addMarkersView.emptyModel}" onPointClick="handlePointClick(event);" widgetVar="map" />
 
 		<p:dialog widgetVar="dlg" showEffect="fade">
 			<h:form prependId="false">
 				<h:panelGrid columns="2">
-					<h:outputLabel for="title" value="Title:" />
+					<h:outputLabel for="title" value="Nazwa uczelni:" />
 					<p:inputText id="title" value="#{addMarkersView.title}" />
+					<h:outputLabel for="title" value="Opis:" />
+					<p:inputText id="description" value="#{addMarkersView.description}"/>
+					<h:outputLabel for="title" value="Miejsce w rankingu:" />
+					<p:inputText id="rankPlace" value="#{addMarkersView.rankPlace}"/>
+					<h:outputLabel for="title" value="Link:" />
+					<p:inputText id="website" value="#{addMarkersView.website}"/>
+
 
 					<f:facet name="footer">
 						<p:commandButton value="Add" action="#{addMarkersView.addMarker}" update=":messages" oncomplete="markerAddComplete()" />
@@ -70,5 +88,4 @@
 
 	</div>
 </h:body>
-
 </html>
